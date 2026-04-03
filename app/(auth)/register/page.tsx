@@ -9,8 +9,8 @@ import { ArrowRight, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 
 export default function RegisterPage() {
-  const containerRef = useRef(null);
-  const formRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   
   const [showPassword, setShowPassword] = useState(false);
