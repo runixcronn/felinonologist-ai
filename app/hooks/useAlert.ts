@@ -1,2 +1,5 @@
-export { useAlert } from "./providers/AlertProvider";
-export type { AlertType, AlertItem } from "./providers/AlertProvider";
+export { useAlert } from "../components/providers/AlertProvider";
+export type {
+  AlertType,
+  AlertItem,
+} from "../components/providers/AlertProvider";
