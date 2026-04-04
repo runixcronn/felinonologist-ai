@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ArrowRight, Mail, Lock, Eye, EyeOff, PawPrint } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { useAlert } from "@/app/components/providers/AlertProvider";
 
 export default function LoginPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -17,7 +18,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { showAlert } = useAlert();
 
   useGSAP(() => {
     const tl = gsap.timeline();
@@ -40,7 +41,6 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
       const supabase = createClient();
@@ -88,7 +88,20 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (err: any) {
-      setError(err.message || "Giriş yapılırken bir hata oluştu.");
+      const errorMessage = err.message || "";
+      
+      // Supabase hata mesajlarını Türkçeye çevir
+      const turkishErrorMessages: Record<string, string> = {
+        "Invalid login credentials": "E-posta veya şifre hatalı. Lütfen bilgilerinizi kontrol edin.",
+        "Email not confirmed": "E-posta adresiniz henüz doğrulanmamış. Lütfen e-postanızı kontrol edin.",
+        "User not found": "Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı.",
+        "Invalid email or password": "E-posta veya şifre hatalı.",
+        "Email rate limit exceeded": "Çok fazla deneme yaptınız. Lütfen bir süre bekleyin.",
+        "Password should be at least 6 characters": "Şifre en az 6 karakter olmalıdır.",
+      };
+      
+      const translatedMessage = turkishErrorMessages[errorMessage] || "Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.";
+      showAlert(translatedMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -135,7 +148,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-orange-500/10 mb-4 text-orange-500">
             <PawPrint className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-300">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-orange-300">
             Tekrar Hoşgeldiniz
           </h1>
           <p className="text-muted mt-2 text-sm">
@@ -144,12 +157,6 @@ export default function LoginPage() {
         </div>
 
         <form ref={formRef} onSubmit={handleLogin} className="space-y-6">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
-              {error}
-            </div>
-          )}
-
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground ml-1">E-posta</label>
             <div className="relative group">

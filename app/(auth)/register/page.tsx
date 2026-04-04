@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ArrowRight, Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
+import { useAlert } from "@/app/components/providers/AlertProvider";
 
 export default function RegisterPage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,7 +19,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { showAlert } = useAlert();
 
   useGSAP(() => {
     const tl = gsap.timeline();
@@ -41,7 +42,6 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
       const supabase = createClient();
@@ -84,12 +84,12 @@ export default function RegisterPage() {
           router.push("/");
         } else {
           // Email confirmation required case
-          alert("Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.");
+          showAlert("Kayıt başarılı! Lütfen e-postanızı kontrol ederek hesabınızı doğrulayın.", "success");
           router.push("/login");
         }
       }
     } catch (err: any) {
-      setError(err.message || "Bir hata oluştu.");
+      showAlert(err.message || "Kayıt olurken bir hata oluştu.", "error");
     } finally {
       setLoading(false);
     }
@@ -136,7 +136,7 @@ export default function RegisterPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-orange-500/10 mb-4 text-orange-500">
             <User className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-300">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-orange-300">
             Aramıza Katılın
           </h1>
           <p className="text-muted mt-2 text-sm">
@@ -145,12 +145,6 @@ export default function RegisterPage() {
         </div>
 
         <form ref={formRef} onSubmit={handleRegister} className="space-y-5">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
-              {error}
-            </div>
-          )}
-          
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground ml-1">Ad Soyad</label>
             <div className="relative group">

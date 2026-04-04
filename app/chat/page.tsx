@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/utils/supabase/client";
 import { ConfirmModal } from "@/app/components/ConfirmModal";
+import { useAlert } from "@/app/components/providers/AlertProvider";
 
 // Types
 type Message = {
@@ -62,7 +63,8 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
-  
+  const { showAlert } = useAlert();
+
   const supabase = createClient();
 
   // Fetch Chats on Load
@@ -119,7 +121,7 @@ export default function ChatPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("Dosya boyutu 5MB'dan küçük olmalıdır.");
+        showAlert("Dosya boyutu 5MB'dan küçük olmalıdır.", "warning");
         return;
       }
       setSelectedImage(file);
@@ -424,7 +426,7 @@ export default function ChatPage() {
           </div>
         </div>
 
-         {/* Sidebar Footer Controls */}
+        {/* Sidebar Footer */}
         <div className="p-3 border-t border-border-neutral">
            <div className="bg-orange-500/10 rounded-xl p-3 overflow-hidden">
               <div className="flex items-center gap-3 mb-2 sidebar-item">
@@ -463,7 +465,7 @@ export default function ChatPage() {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-surface-elevated hover:bg-surface-hover transition-colors border border-transparent hover:border-border-neutral"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-md">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white shadow-md">
                 <User className="w-4 h-4" />
               </div>
               <span className="text-xs font-medium hidden sm:block">Profil</span>
@@ -520,12 +522,11 @@ export default function ChatPage() {
         >
           <div className="max-w-3xl mx-auto space-y-6">
             {messages.length === 0 ? (
-              /* Welcome Placeholder */
               <div className="h-full flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
                 <div className="w-20 h-20 rounded-2xl bg-orange-500/10 flex items-center justify-center mb-6 hero-element">
                     <Bot className="w-10 h-10 text-orange-500" />
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-orange-700 dark:to-orange-300 hero-element">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3 bg-clip-text text-transparent bg-linear-to-r from-orange-500 to-orange-700 dark:to-orange-300 hero-element">
                   Merhaba, nasıl yardımcı olabilirim?
                 </h2>
                 <p className="text-muted max-w-md hero-element">
@@ -536,10 +537,7 @@ export default function ChatPage() {
                   {["British Shorthair özellikleri nedir?", "Kedim neden çok miyavlıyor?", "En iyi kedi maması önerileri", "Aşı takvimi nasıl olmalı?"].map((suggestion, i) => (
                     <button 
                       key={i}
-                      onClick={() => {
-                        setInput(suggestion);
-                        // Optional: auto send
-                      }}
+                      onClick={() => setInput(suggestion)}
                        className="p-3 text-sm text-left border border-border-neutral rounded-xl hover:bg-surface-hover hover:border-brand/30 transition-all group"
                     >
                       <span className="group-hover:text-brand transition-colors">{suggestion}</span>
@@ -548,7 +546,6 @@ export default function ChatPage() {
                 </div>
               </div>
             ) : isChatLoading ? (
-              /* Chat Loading Skeleton */
               <div className="space-y-6 animate-pulse">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className={`flex gap-4 ${i % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
@@ -566,7 +563,6 @@ export default function ChatPage() {
                 ))}
               </div>
             ) : (
-              /* Message List */
               messages.map((msg, idx) => (
                 <div key={idx} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'assistant' && (
@@ -586,7 +582,7 @@ export default function ChatPage() {
                   >
                     {msg.image_url && (
                       <div className="mb-3 rounded-lg overflow-hidden max-w-sm">
-                        <img src={msg.image_url} alt="Uploaded" className="w-full h-auto object-cover" />
+                        <img src={msg.image_url} alt="Uploaded" className="w-full h-auto rounded-lg object-cover" />
                       </div>
                     )}
                     {msg.role === 'assistant' ? (
@@ -607,7 +603,6 @@ export default function ChatPage() {
               ))
             )}
             
-            {/* AI Typing Indicator */}
             {isLoading && (
               <div className="flex gap-4 justify-start">
                 <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0 mt-1">
@@ -615,38 +610,20 @@ export default function ChatPage() {
                 </div>
                 <div className="bg-zinc-100 dark:bg-zinc-800/80 rounded-2xl rounded-tl-sm border border-zinc-200 dark:border-zinc-700/50 px-5 py-4">
                   <div className="flex items-center gap-2">
-                    <span 
-                      className="w-2.5 h-2.5 bg-orange-500 rounded-full"
-                      style={{ 
-                        animation: 'bounce 1s infinite',
-                        animationDelay: '0ms'
-                      }}
-                    ></span>
-                    <span 
-                      className="w-2.5 h-2.5 bg-orange-500 rounded-full"
-                      style={{ 
-                        animation: 'bounce 1s infinite',
-                        animationDelay: '200ms'
-                      }}
-                    ></span>
-                    <span 
-                      className="w-2.5 h-2.5 bg-orange-500 rounded-full"
-                      style={{ 
-                        animation: 'bounce 1s infinite',
-                        animationDelay: '400ms'
-                      }}
-                    ></span>
+                    <span className="w-2.5 h-2.5 bg-orange-500 rounded-full" style={{ animation: 'bounce 1s infinite', animationDelay: '0ms' }}></span>
+                    <span className="w-2.5 h-2.5 bg-orange-500 rounded-full" style={{ animation: 'bounce 1s infinite', animationDelay: '200ms' }}></span>
+                    <span className="w-2.5 h-2.5 bg-orange-500 rounded-full" style={{ animation: 'bounce 1s infinite', animationDelay: '400ms' }}></span>
                   </div>
                 </div>
               </div>
             )}
             
-            <div ref={messagesEndRef} /> {/* Scroll anchor */}
+            <div ref={messagesEndRef} />
           </div>
         </div>
 
         {/* Bottom Input Area */}
-        <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-background via-background to-transparent input-section">
+        <div className="absolute bottom-0 left-0 w-full p-4 bg-linear-to-t from-background via-background to-transparent input-section">
           <div className="max-w-3xl mx-auto">
             {imagePreview && (
               <div className="mb-2 relative inline-block">
@@ -665,7 +642,6 @@ export default function ChatPage() {
                 className="w-full bg-surface-elevated border border-border-neutral rounded-2xl pl-12 pr-14 py-4 shadow-lg shadow-black/5 focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-all placeholder:text-muted"
                 disabled={isLoading}
               />
-              {/* Image Upload Button */}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -695,7 +671,6 @@ export default function ChatPage() {
             </p>
           </div>
         </div>
-
       </main>
       
       {/* Delete Confirmation Modal */}

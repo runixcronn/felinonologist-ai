@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { LenisProvider } from "./components/providers/LenisProvider";
 import { ThemeProvider } from "./components/providers/ThemeProvider";
+import { AlertProvider } from "./components/providers/AlertProvider";
 
 const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -32,7 +33,9 @@ export default function RootLayout({
       <body className={`${plusJakarta.variable} font-sans antialiased`}>
         <ThemeProvider>
           <LenisProvider>
-            {children}
+            <AlertProvider>
+              {children}
+            </AlertProvider>
           </LenisProvider>
         </ThemeProvider>
       </body>
